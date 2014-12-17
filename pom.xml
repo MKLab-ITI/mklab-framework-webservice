@@ -5,51 +5,13 @@
 
     <groupId>gr.iti.mklab</groupId>
     <artifactId>mklab-framework-webservice</artifactId>
-    <packaging>jar</packaging>
+    <packaging>war</packaging>
     <version>0.1-SNAPSHOT</version>
-	
+    
     <name>mklab-framework-webservice</name>
 
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>org.glassfish.jersey</groupId>
-                <artifactId>jersey-bom</artifactId>
-                <version>${jersey.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
-
-    <dependencies>
-        <dependency>
-            <groupId>org.glassfish.jersey.containers</groupId>
-            <artifactId>jersey-container-grizzly2-http</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.glassfish.jersey.media</groupId>
-            <artifactId>jersey-media-moxy</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.9</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-        	<groupId>gr.iti.mklab</groupId>
-        	<artifactId>mklab-framework-common</artifactId>
-        	<version>0.1-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-        	<groupId>gr.iti.mklab</groupId>
-        	<artifactId>mklab-framework-client</artifactId>
-        	<version>0.1-SNAPSHOT</version>
-        </dependency>
-    </dependencies>
-
     <build>
+        <finalName>mklab-framework-webservice</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -73,12 +35,50 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <mainClass>com.example.Main</mainClass>
+                    <mainClass>gr.iti.mklab.framework.webservice.MainApp</mainClass>
                 </configuration>
             </plugin>
         </plugins>
     </build>
+    
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.glassfish.jersey</groupId>
+                <artifactId>jersey-bom</artifactId>
+                <version>${jersey.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
+    <dependencies>
+        <dependency>
+            <groupId>org.glassfish.jersey.containers</groupId>
+            <artifactId>jersey-container-servlet-core</artifactId>
+            <!-- use the following artifactId if you don't need servlet 2.x compatibility -->
+            <!-- artifactId>jersey-container-servlet</artifactId -->
+        </dependency>
+     	<dependency>
+            <groupId>org.glassfish.jersey.containers</groupId>
+            <artifactId>jersey-container-grizzly2-http</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.jersey.media</groupId>
+            <artifactId>jersey-media-moxy</artifactId>
+        </dependency>
+        <dependency>
+        	<groupId>gr.iti.mklab</groupId>
+        	<artifactId>mklab-framework-common</artifactId>
+        	<version>0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+        	<groupId>gr.iti.mklab</groupId>
+        	<artifactId>mklab-framework-client</artifactId>
+        	<version>0.1-SNAPSHOT</version>
+        </dependency>
+    </dependencies>
     <properties>
         <jersey.version>2.14</jersey.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
