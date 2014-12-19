@@ -8,6 +8,7 @@ import gr.iti.mklab.framework.client.search.SearchEngineResponse;
 import gr.iti.mklab.framework.client.search.solr.SolrItemHandler;
 import gr.iti.mklab.framework.common.domain.Collection;
 import gr.iti.mklab.framework.common.domain.Item;
+import gr.iti.mklab.framework.common.domain.StreamUser;
 
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
@@ -27,26 +28,39 @@ import org.mongodb.morphia.query.Query;
  * 
  */
 @Path("items")
-public class ItemsResource {
+public class ItemResource {
 
-	private static Logger logger = Logger.getLogger(ItemsResource.class);
-	private static BasicDAO<Item, String> dao = null;
+	private static Logger logger = Logger.getLogger(ItemResource.class);
+	private static BasicDAO<Item, String> itemDao = null;
+	private static BasicDAO<StreamUser, String> userDao = null;
+	
 	private static SolrItemHandler solrHandler = null;
 
-	public ItemsResource() {
+	public ItemResource() {
 
 		String hostname = "xxx.xxx.xxx.xxx";
 		String dbName = "test";
 		String solrCollection = "http://xxx.xxx.xxx.xxx:8080/solr/PressRelationsItems";
 		
-		if(dao == null) {
+		if(itemDao == null) {
 			DAOFactory daoFactory = new DAOFactory();
 			try {
-				dao  = daoFactory.getDAO(hostname, dbName, Item.class);
+				itemDao  = daoFactory.getDAO(hostname, dbName, Item.class);
 			} catch (Exception e) {
 				logger.error(e);
 			}
 		}
+		
+		if(userDao == null) {
+			DAOFactory daoFactory = new DAOFactory();
+			try {
+				userDao  = daoFactory.getDAO(hostname, dbName, StreamUser.class);
+			} catch (Exception e) {
+				logger.error(e);
+			}
+		}
+		
+		
 		
 		if(solrHandler == null) {
 			try {
@@ -58,30 +72,44 @@ public class ItemsResource {
 	}
 
     /**
-     * @return String that will be returned as a text/plain response.
+     * @return Response that will be returned as a json response.
      */
 	@Path("{id}")
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public String get(@PathParam("id") String id) {
+    public Response get(@PathParam("id") String id) {
     	
-		Query<Item> query = dao.createQuery().filter("id", id);
-		logger.info(query);
+		Query<Item> itemQuery = itemDao.createQuery().filter("id", id);
+		logger.info(itemQuery);
 		try {
-			Item item = dao.findOne(query);
+			Item item = itemDao.findOne(itemQuery);
 			if(item == null) {
-				return "{\"status\" : 1}";
+				Response response = Response.status(400).entity("{ }").build();
+				return  response;
 			}
-			return item.toString();
+			
+			String uid = item.getUserId();
+			StreamUser streamUser = userDao.get(uid);
+			if(streamUser == null) {
+				Response response = Response.status(400).entity("{ }").build();
+				return  response;
+			}
+	
+			item.setStreamUser(streamUser);
+			
+			Response response = Response.status(200).entity(item.toString()).build();
+			return  response;
 		}
 		catch(Exception e) {
 			logger.error(e);
-			return "{\"status\" : 1}";
+			Response response = Response.status(400)
+					.entity("{ }").build();
+			return  response;
 		}
     }
 	
     /**
-     * @return String that will be returned as a text/plain response.
+     * @return Response that will be returned as a json response.
      */
 	@Path("search")
     @GET
@@ -94,7 +122,7 @@ public class ItemsResource {
 			SearchEngineResponse<Item> items = solrHandler.findItems(query, filters, facets, "publicationTime", size);
 			if(items == null) {
 				Response response = Response.status(400)
-						.entity("{\"status\" : 1}").build();
+						.entity("{ }").build();
 				return  response;
 			}
 			
@@ -108,7 +136,7 @@ public class ItemsResource {
 			logger.error(e);
 			
 			Response response = Response.status(400)
-					.entity("{\"exception\" : " + e.getMessage() + "}").build();
+					.entity("{ }").build();
 			return  response;
 		}
     }
